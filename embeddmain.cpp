@@ -14,7 +14,7 @@ main(int argc, char *argv[])
 
     Py_Initialize();
     PyRun_SimpleString("import sys");
-    PyRun_SimpleString("sys.path.append(\".\")");
+    PyRun_SimpleString("sys.path.append(\"./python\")");
     pName = PyString_FromString("multiply");
     /* Error checking of pName left out */
 
