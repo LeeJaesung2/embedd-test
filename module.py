@@ -1,12 +1,11 @@
-import math
 
-temp = math.sin(10)
-
-def test(a,b):
+def test(temp):
     temp+=10
     print(temp)
+    return temp
     
-def test2(a,b):
+def test2(temp):
     temp+=20
     print(temp)
+    return temp
     

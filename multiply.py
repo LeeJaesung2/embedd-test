@@ -1,5 +1,6 @@
 from module import *
-
 def multiply(a,b):
-    test(a,b)
-    test2(a,b)
+
+    temp = 0
+    temp = test(temp)
+    temp = test2(temp)
