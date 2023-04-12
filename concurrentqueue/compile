@@ -1,0 +1,3 @@
+<!-- https://www.specialguy.net/144 -->
+
+g++ concurrent_queue.cpp -pthread -ltbb -std=c++14
