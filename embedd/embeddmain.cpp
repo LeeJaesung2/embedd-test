@@ -1,4 +1,10 @@
-#include <Python.h>
+#include <python2.7/Python.h>
+
+typedef struct {
+    int x;
+    int y;
+} Point;
+
 
 int
 main(int argc, char *argv[])
