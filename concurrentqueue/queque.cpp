@@ -1,34 +1,83 @@
-#include <iostream>
-#include <thread>
-#include <tbb/concurrent_priority_queue.h>
+#include <DBASEV/visibility.h>
+#include <DBASEV/collision_avoidance.h>
+#include <DBASEV/communication.h>
+#include <DBASEV/drone_control.h>
 
-using namespace concurrency;
 
-void *producer(concurrent_priority_queue<int>& q) {
-    for (int i = 0; i < 10; ++i) {
-        q.push(i);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+int size;
+
+#define NUM_THREADS 2
+void * thread_func2(void *arg)
+{
+    /*send data with queue*/
+    tbb::concurrent_queue<const char*>* cq = static_cast<tbb::concurrent_queue<const char*>*>(arg);
+    for (int i = 0; i < 10000; i++) {
+        const char* msg = "message success";
+        const char* tmp;
+        while (cq->try_pop(tmp)) {
+        // Do something with x
+        size--;
+        printf("queue size is %d\n",size);
     }
+        cq->push(msg); // push item into the concurrent queue
+        size++;
+        printf("queue size is %d\n",size);
+    }
+    return 0;
+
 }
 
-void *consumer(concurrent_priority_queue<int>& q) {
-    while (true) {
-        int value;
-        if (q.try_pop(value)) {
-            std::cout << "Popped value: " << value << std::endl;
+void * thread_func1(void *arg)
+{   
+    /*get data from queue*/
+    tbb::concurrent_queue<const char*>* cq = static_cast<tbb::concurrent_queue<const char*>*>(arg);
+    const char* msg;
+    for (int i = 0; i < 10000; i++) {
+        if (cq->try_pop(msg)) { // try to pop item from the concurrent queue
+            size--;
+            printf("queue size is %d\n",size);
+            printf("%s\n",msg);
+        } else {
+            printf("Concurrent queue is empty\n");
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
+
+    
+    //func = "embedd";
+    //callPython(src, func, 1, 1);   
+    
+    return 0;
 }
 
-int main() {
-    concurrent_priority_queue<int> q;
+int main()
+{
+    void *status;
+    int thr_id;
+    time_t begin = clock();
+    tbb::concurrent_queue<const char*> cq; // concurrent queue
+    
+    // 각각의 스레드를 생성
+    pthread_t threads[NUM_THREADS];
 
-    pthread_create(&threads[0], NULL, &producer, &(ref(q)));
-    pthread_create(&threads[0], NULL, &consumer, &(ref(q)));
+    //첫번째 스레드 생성
+    thr_id = pthread_create(&threads[0], NULL, &thread_func1, (void *)&cq);
+    if(thr_id < 0){
+        perror("failure create thread");
+    }
+    // 두번째 스레드 생성
+    thr_id = pthread_create(&threads[1], NULL, &thread_func2, (void *)&cq);
+    if(thr_id < 0){
+        perror("failure create thread");
+    }
+   
 
-    producer_thread.join();
-    consumer_thread.join();
+    // 각각의 스레드가 종료될 때까지 대기
+    for (int i = 0; i < NUM_THREADS; i++) {
+        pthread_join(threads[i], &status);
+    }
+
+    //모든 스레드 종료시 메인스레드 기능
+    printf("all of threads are dead");
 
     return 0;
 }

@@ -7,4 +7,9 @@ def my_function(msg, cardata):
             "waypoint_id" : 52,
             "velocity" : 36.2,
         }
-    return car_data
+    car_data2 ={
+            "road_id" : 11,
+            "waypoint_id" : 52,
+            "velocity" : 36.2,
+        }
+    return car_data, car_data2
