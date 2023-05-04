@@ -94,7 +94,7 @@ void * producer(void *arg){
     MsgBuf msg;
     msg.msgtype = 1;
 
-    key_id = msgget((key_t) 4567, IPC_CREAT|0666);
+    key_id = msgget((key_t) 8989, IPC_CREAT|0600);
 
     if (key_id == -1) {
         cerr << "Message Get Failed!" << endl;
