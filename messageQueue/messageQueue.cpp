@@ -1,6 +1,16 @@
 #include "messageQueue.h"
 #include <python2.7/Python.h>
 
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <cstdlib>
+#include <unistd.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+
+#define BUFFER_SIZE 1024
 int callPython(const char *src,const char *func, int arg, ...){
     PyObject *pName, *pModule, *pFunc;
     PyObject *pArgs, *pValue;
@@ -69,8 +79,46 @@ int callPython(const char *src,const char *func, int arg, ...){
     
 }
 
+using namespace std;
+
+struct MsgBuf {
+    long msgtype; // message type, must be > 0
+    int value;
+    char buf[BUFFER_SIZE];
+};
+
+
 void * producer(void *arg){
-    //producer func here
+    int cnt = 0;
+    int key_id;
+    MsgBuf msg;
+    msg.msgtype = 1;
+
+    key_id = msgget((key_t) 4567, IPC_CREAT|0666);
+
+    if (key_id == -1) {
+        cerr << "Message Get Failed!" << endl;
+        exit(EXIT_FAILURE);
+    }
+    
+    while (1) {
+        msg.value = ++cnt;
+    
+        if (cnt >= 10) {
+            cout << "Message Sending Finished!" << endl;
+            break;
+        }
+
+        strcpy(msg.buf, "Hello from C++ producer!");
+        if (msgsnd(key_id, &msg, sizeof(msg), IPC_NOWAIT) == -1) {
+            cerr << "Message Sending Failed!" << endl;
+            exit(EXIT_FAILURE);
+        }
+        
+        cout << "value: " << msg.value << endl;
+        sleep(1);
+    }
+    exit(EXIT_SUCCESS);
     return 0;
 }
 
@@ -80,4 +128,8 @@ void * consumer(void *arg){
     callPython(src, func, 1, 1);   
     return 0;
 }
+
+
+
+
 
