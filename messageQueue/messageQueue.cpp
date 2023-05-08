@@ -94,8 +94,8 @@ void * producer(void *arg){
     MsgBuf msg;
     msg.msgtype = 1;
 
-    key_id = msgget((key_t) 8989, IPC_CREAT|0600);
-
+    key_id = msgget((key_t) 1919, IPC_CREAT|0666);
+    printf("queue key id is %d\n",key_id);
     if (key_id == -1) {
         cerr << "Message Get Failed!" << endl;
         exit(EXIT_FAILURE);
