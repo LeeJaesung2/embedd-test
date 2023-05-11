@@ -109,10 +109,6 @@ void * producer(void *arg){
             break;
         }
         strcpy(msg.buf, "Hello from C++ producer!");
-        // printf("struct size is %ld\n", sizeof(msg));
-        // printf("msgtype size is %ld\n", sizeof(msg.msgtype));
-        // printf("value size is %ld\n", sizeof(msg.value));
-        // printf("buffer size is %ld\n", sizeof(msg.buf));
         if (msgsnd(key_id, &msg, sizeof(msg), IPC_NOWAIT) == -1) {
             cerr << "Message Sending Failed!" << endl;
             exit(EXIT_FAILURE);
