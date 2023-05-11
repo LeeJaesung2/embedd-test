@@ -87,6 +87,58 @@ struct MsgBuf {
     char buf[BUFFER_SIZE];
 };
 
+int mq_init(key_t key){
+
+    int key_id = msgget( key, IPC_CREAT|0666);
+    if (key_id == -1) {
+        cerr << "Message Get Failed!" << endl;
+        exit(EXIT_FAILURE);
+    }
+    return key_id;
+}
+
+void push(int key_id,msqid_ds buf, MsgBuf msg){
+    // Check the number of messages currently in the queue
+    if (msgctl(key_id, IPC_STAT, &buf) == -1) {
+        std::cerr << "Failed to get message queue status!" << std::endl;
+        return;
+    }
+    if (buf.msg_qnum >= 409) {
+        std::cerr << "Message queue is full. Skipping message send." << std::endl;
+        sleep(1);
+        return;
+    }
+
+    printf("num of data in the queue is %ld\n",buf.msg_qnum);
+    if (msgsnd(key_id, &msg, sizeof(msg), IPC_NOWAIT) == -1) {
+            cerr << "Message Sending Failed!" << endl;
+            exit(EXIT_FAILURE);
+        }
+}
+
+void * comm(void *arg){
+    int cnt = 0;
+    MsgBuf msg;
+    msg.msgtype = 1;
+    int key_id = mq_init((key_t)6161);
+
+    struct msqid_ds buf;
+    while(1){
+        msg.value = ++cnt;
+        if (cnt >= 10000) {
+            cout << "Message Sending Finished!" << endl;
+            break;
+        }
+        strcpy(msg.buf, "Hello from C++ producer!");
+        push(key_id,buf, msg);
+        cout << "value: " << msg.value << endl;
+        //sleep(1);
+
+    }
+
+    return 0;
+}
+
 
 void * producer(void *arg){
     int cnt = 0;
