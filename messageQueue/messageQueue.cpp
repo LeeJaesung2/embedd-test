@@ -10,7 +10,7 @@
 #include <sys/msg.h>
 
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 26
 int callPython(const char *src,const char *func, int arg, ...){
     PyObject *pName, *pModule, *pFunc;
     PyObject *pArgs, *pValue;
@@ -94,7 +94,7 @@ void * producer(void *arg){
     MsgBuf msg;
     msg.msgtype = 1;
 
-    key_id = msgget((key_t) 1919, IPC_CREAT|0666);
+    key_id = msgget((key_t) 7777, IPC_CREAT|0666);
     printf("queue key id is %d\n",key_id);
     if (key_id == -1) {
         cerr << "Message Get Failed!" << endl;
@@ -108,8 +108,11 @@ void * producer(void *arg){
             cout << "Message Sending Finished!" << endl;
             break;
         }
-
         strcpy(msg.buf, "Hello from C++ producer!");
+        // printf("struct size is %ld\n", sizeof(msg));
+        // printf("msgtype size is %ld\n", sizeof(msg.msgtype));
+        // printf("value size is %ld\n", sizeof(msg.value));
+        // printf("buffer size is %ld\n", sizeof(msg.buf));
         if (msgsnd(key_id, &msg, sizeof(msg), IPC_NOWAIT) == -1) {
             cerr << "Message Sending Failed!" << endl;
             exit(EXIT_FAILURE);

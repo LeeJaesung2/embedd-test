@@ -9,16 +9,16 @@ class MsgBuf(Structure):
     _fields_ = [
         ("msgtype", c_long),
         ("value", c_int),
-        ("buf", c_char * 1024)
+        ("buf", c_char * 26)
     ]
 
 
 def consumer(a):
-    BUFFER_SIZE = 1024
+    BUFFER_SIZE = 26
 
 
     # Get message queue ID using same key as C++ program
-    key = 1919
+    key = 7777
     mq = sysv_ipc.MessageQueue(key, sysv_ipc.IPC_CREAT)
 
     print("Message queue created with ID:", mq)
@@ -34,17 +34,18 @@ def consumer(a):
         # Unpack message data using struct
         print("before unpack message")
 
-        # Define message buffer structure
-        msg_struct = struct.Struct('li' + str(BUFFER_SIZE) + 's')
-        print(data)
+        string_data = data[0][4:28]
 
-        msg = msg_struct.unpack(data)
-        print(msg)
-        value, buf = msg[1], msg[2].decode('utf-8')
+        # Decode the string
+        msg = str(string_data.decode('utf-8'))
+
+        
+
+        value = struct.unpack('<i', data[0][:4])[0]
 
         # Print message contents
         print("Received value:", value)
-        print("Message data:", buf)
+        print("Message data:", msg)
 
         if value >= 10:
             print("All messages received!")
